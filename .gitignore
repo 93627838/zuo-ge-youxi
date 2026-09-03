@@ -1,0 +1,61 @@
+# ===== OS / 文件系统 =====
+.DS_Store
+Thumbs.db
+desktop.ini
+ehthumbs.db
+
+# ===== 编辑器 / IDE =====
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# ===== 依赖（按项目实际使用的删除注释） =====
+node_modules/
+bower_components/
+.pnp/
+.pnp.js
+
+# ===== 构建 / 打包产物 =====
+build/
+dist/
+out/
+bin/
+obj/
+release/
+*.exe
+*.dll
+*.so
+*.dmg
+*.zip
+
+# ===== 日志 / 临时 =====
+*.log
+*.tmp
+*.cache
+.cache/
+
+# ===== 本地存档 / 用户数据（游戏运行时生成，不应入库） =====
+saves/
+save/
+*.save
+userdata/
+localStorage/
+
+# ===== 环境变量 / 密钥 =====
+.env
+.env.*
+!.env.example
+
+# ===== WorkBuddy 项目记忆（不随游戏代码入库） =====
+.workbuddy/
+
+# ===== 常见游戏引擎产物（按需保留） =====
+# Unity
+Library/
+Temp/
+obj/
+# Godot
+.godot/
+# 通用
+/assets/raw/
