@@ -59,3 +59,23 @@ obj/
 .godot/
 # 通用
 /assets/raw/
+
+# ===== Visual Studio / C++ =====
+.vs/
+*.suo
+*.user
+*.VC.db
+*.VC.VC.opendb
+*.ipch
+x64/
+Debug/
+Release/
+Win32/
+*.obj
+*.pdb
+*.ilk
+*.idb
+*.tlog/
+*.recipe
+ipch/
+*.VC.opendb
