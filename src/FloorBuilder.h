@@ -1,16 +1,23 @@
 #pragma once
 #include <unordered_map>
 #include <string>
+#include "Room.h"
+#include "MapTemplates.h"
 
-class Room;
+struct FloorData {
+    std::unordered_map<std::string, Room> rooms;
+    MapTemplate tmpl;
+};
 
-namespace FloorBuilder {
-    // 声明各层的构建函数
-    std::unordered_map<std::string, Room> buildFloor1();
-    std::unordered_map<std::string, Room> buildFloor2();
-    std::unordered_map<std::string, Room> buildFloor3();
-    std::unordered_map<std::string, Room> buildFloor4();
-    std::unordered_map<std::string, Room> buildFloor5();
-    std::unordered_map<std::string, Room> buildFloor6();
-    std::unordered_map<std::string, Room> buildFloor7();
-}
+class FloorBuilder {
+public:
+    static std::unordered_map<std::string, Room> buildFloor1();
+    static std::unordered_map<std::string, Room> buildFloor2();
+    static std::unordered_map<std::string, Room> buildFloor3();
+    static std::unordered_map<std::string, Room> buildFloor4();
+    static std::unordered_map<std::string, Room> buildFloor5();
+    static std::unordered_map<std::string, Room> buildFloor6();
+    static std::unordered_map<std::string, Room> buildFloor7();
+
+    static void buildFloorData(int floor, FloorData& data);
+};

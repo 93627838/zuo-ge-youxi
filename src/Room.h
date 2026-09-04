@@ -62,16 +62,31 @@ public:
     void markCleared() { is_cleared = true; }
 
     // ---------- 工具函数：获取类型的中文描述 ----------
-    std::string getTypeName() const {
+    std::string getTypeNameWithColor() const {
         switch (type) {
-        case RoomType::Start:    return "起点";
-        case RoomType::Combat:   return "战斗";
-        case RoomType::Elite:    return "精英";
-        case RoomType::Boss:     return "首领";
-        case RoomType::Treasure: return "宝藏";
-        case RoomType::Event:    return "事件";
-        case RoomType::Shop:     return "商店";
+        case RoomType::Start:    return "\033[37m起点\033[0m";   // 白色
+        case RoomType::Combat:   return "\033[90m战斗\033[0m";   // 灰色
+        case RoomType::Elite:    return "\033[33m精英\033[0m";   // 黄色
+        case RoomType::Boss:     return "\033[31m首领\033[0m";   // 红色
+        case RoomType::Treasure: return "\033[36m宝藏\033[0m";   // 青色
+        case RoomType::Event:    return "\033[35m事件\033[0m";   // 品红
+        case RoomType::Shop:     return "\033[32m商店\033[0m";   // 绿色
         default: return "未知";
         }
+    }
+
+    std::string getColoredName() const {
+        std::string color;
+        switch (type) {
+        case RoomType::Start:    color = "\033[37m"; break; // 白色
+        case RoomType::Combat:   color = "\033[90m"; break; // 灰色
+        case RoomType::Elite:    color = "\033[33m"; break; // 黄色
+        case RoomType::Boss:     color = "\033[31m"; break; // 红色
+        case RoomType::Treasure: color = "\033[36m"; break; // 青色
+        case RoomType::Event:    color = "\033[35m"; break; // 品红
+        case RoomType::Shop:     color = "\033[32m"; break; // 绿色
+        default: return name;
+        }
+        return color + name + "\033[0m";
     }
 };

@@ -132,12 +132,15 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="src\FloorBuilder.cpp" />
+    <ClCompile Include="src\FloorGenerator.cpp" />
     <ClCompile Include="src\FloorManager.cpp" />
     <ClCompile Include="src\main.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\FloorBuilder.h" />
+    <ClInclude Include="src\FloorGenerator.h" />
     <ClInclude Include="src\FloorManager.h" />
+    <ClInclude Include="src\MapTemplates.h" />
     <ClInclude Include="src\Room.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

@@ -34,6 +34,7 @@ release/
 *.tmp
 *.cache
 .cache/
+.buildtest/
 
 # ===== 本地存档 / 用户数据（游戏运行时生成，不应入库） =====
 saves/
