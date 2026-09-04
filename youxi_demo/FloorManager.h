@@ -50,4 +50,7 @@ public:
 
     // ---------- µÿÕºœ‘ æ ----------
     void drawMap() const;
+
+private:
+    void drawFixedMap() const;
 };

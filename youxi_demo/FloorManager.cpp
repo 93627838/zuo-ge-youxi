@@ -7,6 +7,7 @@
 #include <algorithm>
 #include <cmath>
 #include <optional>
+#include <queue>
 #include <stdexcept>
 
 #ifdef _WIN32
@@ -134,21 +135,7 @@ void FloorManager::drawMap() const {
     }
 
     if (current_is_fixed || current_tmpl.coords.empty()) {
-        cout << "\n===== 当前楼层地图 (第 " << current_floor << " 层 · 固定剧情) =====\n";
-        const Room& cur = getCurrentRoom();
-        cout << "当前位于: " << cur.getName() << " [" << cur.getTypeNameWithColor() << "]\n";
-        const auto& options = cur.getNextIds();
-        if (options.empty()) {
-            cout << "前方没有更多房间，击败BOSS后可继续前进。\n";
-        }
-        else {
-            cout << "可前往:\n";
-            for (const auto& id : options) {
-                const Room& next = getRoomById(id);
-                cout << "  - " << next.getName() << " [" << next.getTypeNameWithColor() << "]\n";
-            }
-        }
-        cout << "\n";
+        drawFixedMap();
         return;
     }
 
@@ -259,6 +246,178 @@ void FloorManager::drawMap() const {
     }
 
     // 6. 图例
+    cout << "\n图例: ";
+    cout << Color::WHITE << "P起点 " << Color::RESET;
+    cout << Color::GRAY << "C战斗 " << Color::RESET;
+    cout << Color::YELLOW << "E精英 " << Color::RESET;
+    cout << Color::RED << "B首领 " << Color::RESET;
+    cout << Color::CYAN << "T宝藏 " << Color::RESET;
+    cout << Color::MAGENTA << "V事件 " << Color::RESET;
+    cout << Color::GREEN << "S商店 " << Color::RESET;
+    cout << Color::BOLD << Color::BRIGHT << "@你 " << Color::RESET;
+    cout << "\n当前位于: " << getCurrentRoom().getName() << "\n\n";
+}
+
+// 固定剧情楼层没有坐标模板，这里按房间连接关系自动生成一张图形地图
+void FloorManager::drawFixedMap() const {
+    if (rooms.empty())
+        return;
+
+    // 给每个房间分配稳定索引
+    vector<string> ids;
+    unordered_map<string, int> id_index;
+    id_index.reserve(rooms.size());
+    for (const auto& pair : rooms) {
+        id_index[pair.first] = static_cast<int>(ids.size());
+        ids.push_back(pair.first);
+    }
+
+    // 从起点广度优先分层，后续按层布置位置
+    int start = 0;
+    for (int i = 0; i < static_cast<int>(ids.size()); ++i) {
+        if (rooms.at(ids[i]).getType() == RoomType::Start) {
+            start = i;
+            break;
+        }
+    }
+
+    vector<int> layer(ids.size(), -1);
+    queue<int> pending;
+    pending.push(start);
+    layer[start] = 0;
+    while (!pending.empty()) {
+        const int u = pending.front();
+        pending.pop();
+        for (const auto& next_id : rooms.at(ids[u]).getNextIds()) {
+            auto it = id_index.find(next_id);
+            if (it == id_index.end())
+                continue;
+            const int v = it->second;
+            if (layer[v] < 0) {
+                layer[v] = layer[u] + 1;
+                pending.push(v);
+            }
+        }
+    }
+
+    int max_layer = 0;
+    for (int v : layer) {
+        if (v > max_layer) max_layer = v;
+    }
+
+    vector<vector<int>> by_layer(max_layer + 1);
+    for (int i = 0; i < static_cast<int>(ids.size()); ++i) {
+        if (layer[i] >= 0)
+            by_layer[layer[i]].push_back(i);
+    }
+
+    vector<pair<int, int>> coords(ids.size());
+    for (int y = 0; y <= max_layer; ++y) {
+        for (int p = 0; p < static_cast<int>(by_layer[y].size()); ++p) {
+            const int node = by_layer[y][p];
+            coords[node] = { p * 4, y * 2 };
+        }
+    }
+
+    // 若有无法到达的房间，兜底放到最下方，避免下标越界
+    int fallback_y = max_layer + 1;
+    int fallback_x = 0;
+    for (int i = 0; i < static_cast<int>(ids.size()); ++i) {
+        if (layer[i] < 0) {
+            coords[i] = { fallback_x, fallback_y * 2 };
+            ++fallback_x;
+        }
+    }
+
+    vector<pair<int, int>> edges;
+    for (int u = 0; u < static_cast<int>(ids.size()); ++u) {
+        for (const auto& next_id : rooms.at(ids[u]).getNextIds()) {
+            auto it = id_index.find(next_id);
+            if (it != id_index.end())
+                edges.push_back({ u, it->second });
+        }
+    }
+
+    int max_col = 0, max_row = 0;
+    for (const auto& coord : coords) {
+        max_col = max(max_col, coord.first);
+        max_row = max(max_row, coord.second);
+    }
+    const int WIDTH = max_col + 3;
+    const int HEIGHT = max_row + 3;
+
+    vector<string> canvas(HEIGHT, string(WIDTH, ' '));
+    vector<vector<string>> color_map(HEIGHT, vector<string>(WIDTH, Color::RESET));
+
+    for (const auto& edge : edges) {
+        const int x1 = coords[edge.first].first;
+        const int y1 = coords[edge.first].second;
+        const int x2 = coords[edge.second].first;
+        const int y2 = coords[edge.second].second;
+        const int dx = x2 - x1;
+        const int dy = y2 - y1;
+        const int steps = max(abs(dx), abs(dy));
+        if (steps == 0)
+            continue;
+        for (int i = 1; i < steps; ++i) {
+            const int x = x1 + dx * i / steps;
+            const int y = y1 + dy * i / steps;
+            if (x < 0 || x >= WIDTH || y < 0 || y >= HEIGHT)
+                continue;
+            if (canvas[y][x] != ' ')
+                continue;
+            if (dx == 0)
+                canvas[y][x] = '|';
+            else if (dy == 0)
+                canvas[y][x] = '-';
+            else if ((dx > 0 && dy > 0) || (dx < 0 && dy < 0))
+                canvas[y][x] = '\\';
+            else
+                canvas[y][x] = '/';
+        }
+    }
+
+    for (int i = 0; i < static_cast<int>(ids.size()); ++i) {
+        const Room& room = rooms.at(ids[i]);
+        const int x = coords[i].first;
+        const int y = coords[i].second;
+        if (x < 0 || x >= WIDTH || y < 0 || y >= HEIGHT)
+            continue;
+
+        char symbol;
+        string color;
+        if (ids[i] == current_room_id) {
+            symbol = '@';
+            color = Color::BOLD + Color::BRIGHT;
+        }
+        else {
+            switch (room.getType()) {
+            case RoomType::Start:    symbol = 'P'; color = Color::WHITE;   break;
+            case RoomType::Combat:   symbol = 'C'; color = Color::GRAY;    break;
+            case RoomType::Elite:    symbol = 'E'; color = Color::YELLOW;  break;
+            case RoomType::Boss:     symbol = 'B'; color = Color::RED;     break;
+            case RoomType::Treasure: symbol = 'T'; color = Color::CYAN;    break;
+            case RoomType::Event:    symbol = 'V'; color = Color::MAGENTA; break;
+            case RoomType::Shop:     symbol = 'S'; color = Color::GREEN;   break;
+            default:                 symbol = '?'; color = Color::WHITE;   break;
+            }
+        }
+        canvas[y][x] = symbol;
+        color_map[y][x] = color;
+    }
+
+    cout << "\n===== 当前楼层地图 (第 " << current_floor << " 层 · 固定剧情) =====\n";
+    for (int y = 0; y < HEIGHT; ++y) {
+        cout << "\n";
+        for (int x = 0; x < WIDTH; ++x) {
+            const char ch = canvas[y][x];
+            if (ch == ' ')
+                cout << ' ';
+            else
+                cout << color_map[y][x] << ch << Color::RESET;
+        }
+    }
+
     cout << "\n图例: ";
     cout << Color::WHITE << "P起点 " << Color::RESET;
     cout << Color::GRAY << "C战斗 " << Color::RESET;

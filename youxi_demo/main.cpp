@@ -55,6 +55,24 @@ void showStoryEnding() {
     cout << "\n故事模式完成。\n";
 }
 
+// 按统一前缀逐行打印文本，保持菜单排版
+void printIndented(const string& text, const string& prefix) {
+    size_t start = 0;
+    while (start <= text.size()) {
+        const size_t end = text.find('\n', start);
+        const string line = (end == string::npos)
+            ? text.substr(start)
+            : text.substr(start, end - start);
+        if (line.empty())
+            cout << "\n";
+        else
+            cout << prefix << line << "\n";
+        if (end == string::npos)
+            break;
+        start = end + 1;
+    }
+}
+
 int main() {
     Color::init();
 
@@ -128,26 +146,30 @@ int main() {
         }
 
         if (!options.empty()) {
-            cout << "\n可选路径:\n";
+            cout << "\n前方有几个可能的去路：\n";
             for (size_t i = 0; i < options.size(); ++i) {
                 const Room& next = manager.getRoomById(options[i]);
-                cout << "  " << (i + 1) << ". " << next.getColoredName()
-                    << " (" << next.getTypeNameWithColor() << ")\n";
+                cout << "  " << (i + 1) << ". " << next.getColoredName() << "\n";
+                printIndented(next.getDesc(), "     ");
             }
             cout << "\n请输入数字选择，或输入 'map'、'up'、'quit': ";
 
             string input;
             cin >> input;
-            if (input == "quit" || input == "q") {
+            if (input == "quit" || input == "q" || input == "QUIT" || input == "Q") {
                 quit = true;
                 break;
             }
-            if (input == "map" || input == "m") {
-                cout << "\033[2J\033[2;1H";
+            if (input == "map" || input == "m" || input == "MAP" || input == "M") {
+                cout << "\033[2J\033[H";
                 manager.drawMap();
+                cout << "\n请按Enter键继续...\n";
+                cin.get();
+                cin.get();
+                cout << "\033[2J\033[H";
                 continue;
             }
-            if (input == "up") {
+            if (input == "up" || input == "u"|| input == "UP"|| input == "U") {
                 if (manager.tryGoUp()) {
                     cout << "\033[2J\033[H";
                     cout << "你踏入了下一层...\n";
@@ -162,6 +184,7 @@ int main() {
                 const int choice = stoi(input);
                 if (choice >= 1 && choice <= static_cast<int>(options.size())) {
                     manager.moveTo(options[choice - 1]);
+                    cout << "\033[2J\033[2;1H";
                     continue;
                 }
                 cout << "\033[2J\033[H";
@@ -178,10 +201,10 @@ int main() {
             cout << "输入 'up' 上楼，或 'quit' 退出: ";
             string input;
             cin >> input;
-            if (input == "quit" || input == "q") {
+            if (input == "quit" || input == "q" || input == "QUIT" || input == "Q") {
                 quit = true;
             }
-            else if (input == "up") {
+            else if (input == "up" || input == "u" || input == "UP" || input == "U") {
                 if (manager.tryGoUp()) {
                     cout << "\033[2J\033[H";
                     cout << "你踏入了下一层...\n";
@@ -195,8 +218,7 @@ int main() {
                 cout << "无效输入。\n";
             }
         }
-
-        cout << "\033[2J\033[2;1H";
+        cout << "\033[2J\033[H";
     }
     return 0;
 }
