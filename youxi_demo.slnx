@@ -1,0 +1,7 @@
+<Solution>
+  <Configurations>
+    <Platform Name="x64" />
+    <Platform Name="x86" />
+  </Configurations>
+  <Project Path="youxi_demo/youxi_demo.vcxproj" Id="db9902ef-f0d9-4a33-82d9-8ce922f307ed" />
+</Solution>
