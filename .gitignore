@@ -6,6 +6,9 @@
 # WorkBuddy workspace memory (local only)
 .workbuddy/
 
+# 旧工程壳子（废弃，不进版本库）
+zuo-ge-youxi/
+
 # User-specific files
 *.rsuser
 *.suo
