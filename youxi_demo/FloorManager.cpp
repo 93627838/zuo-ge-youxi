@@ -1,6 +1,6 @@
 // FloorManager.cpp
 #include "FloorManager.h"
-#include "FloorGenerator.h"
+#include "FloorSource.h"
 #include <iostream>
 #include <string>
 #include <vector>
@@ -51,8 +51,19 @@ void FloorManager::loadFloor(int floor, unsigned int seed) {
     current_floor = floor;
     boss_defeated = false;
     map_seed = seed;
-    buildFloorData(floor);
-    current_room_id = "F" + to_string(floor) + "_N0";
+
+    LoadedFloor loaded = FloorSource::load(floor, game_mode, seed);
+    rooms = std::move(loaded.rooms);
+    current_tmpl = std::move(loaded.tmpl);
+    current_is_fixed = loaded.fixed_layout;
+
+    current_room_id.clear();
+    for (const auto& pair : rooms) {
+        if (pair.second.getType() == RoomType::Start) {
+            current_room_id = pair.first;
+            break;
+        }
+    }
     if (rooms.find(current_room_id) == rooms.end()) {
         if (!rooms.empty()) {
             current_room_id = rooms.begin()->first;
@@ -105,14 +116,39 @@ optional<RoomReward> FloorManager::clearCurrentRoom() {
 bool FloorManager::tryGoUp() {
     if (!boss_defeated)
         return false;
-    loadFloor(current_floor + 1);
+    if (game_mode == GameMode::Story && current_floor >= 7)
+        return false;
+    loadFloor(current_floor + 1, map_seed);
     return true;
+}
+
+bool FloorManager::isStoryEnd() const {
+    return game_mode == GameMode::Story && current_floor >= 7 && boss_defeated;
 }
 
 // ---------- 地图绘制 ----------
 void FloorManager::drawMap() const {
     if (rooms.empty()) {
         cout << "当前楼层没有地图数据。\n";
+        return;
+    }
+
+    if (current_is_fixed || current_tmpl.coords.empty()) {
+        cout << "\n===== 当前楼层地图 (第 " << current_floor << " 层 · 固定剧情) =====\n";
+        const Room& cur = getCurrentRoom();
+        cout << "当前位于: " << cur.getName() << " [" << cur.getTypeNameWithColor() << "]\n";
+        const auto& options = cur.getNextIds();
+        if (options.empty()) {
+            cout << "前方没有更多房间，击败BOSS后可继续前进。\n";
+        }
+        else {
+            cout << "可前往:\n";
+            for (const auto& id : options) {
+                const Room& next = getRoomById(id);
+                cout << "  - " << next.getName() << " [" << next.getTypeNameWithColor() << "]\n";
+            }
+        }
+        cout << "\n";
         return;
     }
 
@@ -235,10 +271,3 @@ void FloorManager::drawMap() const {
     cout << "\n当前位于: " << getCurrentRoom().getName() << "\n\n";
 }
 
-// ---------- 私有方法 ----------
-void FloorManager::buildFloorData(int floor) {
-    FloorGenerator generator;
-    auto result = generator.generateFloor(floor, map_seed);
-    rooms = std::move(result.rooms);
-    current_tmpl = std::move(result.tmpl);   
-}

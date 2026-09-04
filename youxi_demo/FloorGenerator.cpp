@@ -255,7 +255,7 @@ RoomReward FloorGenerator::generateReward(RoomType type, int floor, mt19937& rng
 }
 
 // ---------- 核心生成函数 ----------
-GenerationResult FloorGenerator::generateFloor(int floor, unsigned int seed) {
+GenerationResult FloorGenerator::generateFloor(int floor, unsigned int seed, int text_floor) {
     // 1. 初始化随机数生成器
     mt19937 rng(seed ? seed : random_device{}());
 
@@ -264,8 +264,14 @@ GenerationResult FloorGenerator::generateFloor(int floor, unsigned int seed) {
     if (pool.empty()) {
         throw runtime_error("当前楼层没有可用的地图模板！");
     }
-    uniform_int_distribution<int> d_tmpl(0, pool.size() - 1);
+    uniform_int_distribution<int> d_tmpl(0, static_cast<int>(pool.size() - 1));
     MapTemplate tmpl = pool[d_tmpl(rng)];
+
+    // 无尽模式中楼层号继续增长，但文字主题可以循环复用前面的楼层
+    const int actual_floor = floor;
+    if (text_floor <= 0)
+        text_floor = floor;
+    floor = text_floor;
 
     // 3. 为每个节点分配房间类型
     vector<RoomType> node_types(tmpl.total_rooms);
@@ -278,10 +284,6 @@ GenerationResult FloorGenerator::generateFloor(int floor, unsigned int seed) {
         }
         else {
             int dist_to_boss = tmpl.boss_node - i;
-            int elite_base_chance = 5;
-            if (dist_to_boss == 1) elite_base_chance = 40;
-            else if (dist_to_boss == 2) elite_base_chance = 20;
-
             uniform_int_distribution<int> d_type(0, 99);
             int roll = d_type(rng);
 
@@ -326,11 +328,11 @@ GenerationResult FloorGenerator::generateFloor(int floor, unsigned int seed) {
     unordered_map<string, Room> rooms;
     for (int i = 0; i < tmpl.total_rooms; ++i) {
         RoomType type = node_types[i];
-        string id = genId(floor, i);
+        string id = genId(actual_floor, i);
 
         const auto& names = getNames(type, floor);
         const auto& descs = getDescs(type, floor);
-        uniform_int_distribution<int> d_text(0, names.size() - 1);
+        uniform_int_distribution<int> d_text(0, static_cast<int>(names.size() - 1));
         int idx = d_text(rng);
 
         string name = names.empty() ? "无名之地" : names[idx];
@@ -400,8 +402,8 @@ GenerationResult FloorGenerator::generateFloor(int floor, unsigned int seed) {
         }
 
         // ---------- 创建房间 ----------
-        Room room(id, floor, name, desc, type);
-        RoomReward reward = generateReward(type, floor, rng);
+        Room room(id, actual_floor, name, desc, type);
+        RoomReward reward = generateReward(type, actual_floor, rng);
         room.setReward(reward);
         rooms[id] = move(room);
     }
@@ -410,8 +412,8 @@ GenerationResult FloorGenerator::generateFloor(int floor, unsigned int seed) {
     for (const auto& edge : tmpl.edges) {
         int from = edge.first;
         int to = edge.second;
-        string from_id = genId(floor, from);
-        string to_id = genId(floor, to);
+        string from_id = genId(actual_floor, from);
+        string to_id = genId(actual_floor, to);
 
         if (rooms.find(from_id) != rooms.end() && rooms.find(to_id) != rooms.end()) {
             rooms[from_id].addNext(to_id);

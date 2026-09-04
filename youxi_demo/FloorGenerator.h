@@ -13,7 +13,8 @@ struct GenerationResult {
 
 class FloorGenerator {
 public:
-    GenerationResult generateFloor(int floor, unsigned int seed = 0);   
+    // text_floor：生成楼层使用的文本主题；0 表示与楼层号一致
+    GenerationResult generateFloor(int floor, unsigned int seed = 0, int text_floor = 0);
 
 private:
     std::string genId(int floor, int nodeIndex);
