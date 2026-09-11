@@ -14,7 +14,7 @@ void Player::NewRun() {
 
     // ===== 测试用:先自带一遗物两药水方便看效果;之后改为从奖励/商店获得 =====
     relics.clear();
-    relics.push_back(std::make_unique<AegisShield>());
+    relics.push_back(std::make_unique<BloodVial>());   // 开局自带小血瓶:每场战斗开始回 2 血
     potions.clear();
     potions.push_back(std::make_unique<ForesightPotion>());
     potions.push_back(std::make_unique<DrawPotion>());
@@ -22,9 +22,8 @@ void Player::NewRun() {
     Reset();   // 铺好第一战的牌堆
 }
 
-// 每场战斗开始前调用:只重置"对局内"的东西;遗物/药水/牌组/金币跨场保留
+// 每场战斗开始前调用:只重置"对局内"的东西;生命/遗物/药水/牌组/金币跨场保留
 void Player::Reset() {
-    hp = maxHp;      // 测试期:每场满血开局
     block = 0;
     strength = 0;
     toughness = 0;

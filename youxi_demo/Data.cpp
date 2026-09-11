@@ -9,7 +9,7 @@ const std::vector<Card> g_cards = {//费用,类型,主效果,主效果数值,副
     {"战吼",     "抽 3 张牌",                          0, CardType::SKILL,  CardEffect::DRAW_CARD, 3, CardEffect::NONE, 0, false, CardRarity::UNCOMMON},//no.4
     {"燃烧",     "获得 2 点力量",                      1, CardType::POWER,  CardEffect::GAIN_STRENGTH, 2},//no.5
     {"耸肩无视",     "获得 8 点格挡,抽 1 张牌",                      1, CardType::SKILL,  CardEffect::GAIN_BLOCK, 8,CardEffect::DRAW_CARD, 1},//no.6
-    {"肾上腺素", "获得 1 点能量,抽 2 张牌",             1, CardType::SKILL,  CardEffect::GAIN_ENERGY, 1, CardEffect::DRAW_CARD, 2},//no.7
+    {"肾上腺素", "获得 1 点能量,抽 2 张牌",             0, CardType::SKILL,  CardEffect::GAIN_ENERGY, 1, CardEffect::DRAW_CARD, 2},//no.7
     {"强身",     "获得 3 点格挡,获得 1 点力量",         1, CardType::SKILL,  CardEffect::GAIN_BLOCK, 3, CardEffect::GAIN_STRENGTH, 1},//no.8
     {"旋风斩",   "造成 X 次 12 点伤害",                     0, CardType::ATTACK, CardEffect::DEAL_DMG, 12, CardEffect::NONE, 0, true, CardRarity::RARE},//no.9
     {"痛击",   "造成 8 点伤害,给予 2 层易伤",      1, CardType::ATTACK, CardEffect::DEAL_DMG, 8, CardEffect::APPLY_VULNERABLE, 2, false, CardRarity::COMMON},//no.10

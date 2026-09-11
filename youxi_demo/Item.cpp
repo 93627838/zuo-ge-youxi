@@ -101,13 +101,16 @@ bool BattleContinuation::CarryEnergy() {
 
 OrnHorn::OrnHorn() {
     name = "奥恩之角";
-    desc = "每当有敌人死亡时,获得并抽 " + std::to_string(drawN) + " 张牌";
+    desc = "每当有敌人死亡时,获得 " + std::to_string(gainEnergy)
+        + " 点能量并抽 " + std::to_string(drawN) + " 张牌";
 }
 
 void OrnHorn::OnEnemyDeath(Player& p, Combat* c) {
-    // 目前 1v1:敌人一死战斗就结束了,抽牌要到多敌人战斗才有实际意义
+    // 敌人死亡时触发(群怪里死一只就触发一次)
     p.deck.Draw(drawN);
-    UI::Print("遗物【" + name + "】触发:敌人死亡,抽取 " + std::to_string(drawN) + " 张牌");
+    if (c) c->GainEnergy(gainEnergy);
+    UI::Print("遗物【" + name + "】触发:敌人死亡,获得 " + std::to_string(gainEnergy)
+        + " 点能量并抽取 " + std::to_string(drawN) + " 张牌");
 }
 
 Sundial::Sundial() {
@@ -293,7 +296,7 @@ const std::vector<ItemDef> g_itemCatalog = {
     { ItemType::CENTENNIAL_PUZZLE,  true,  "百年积木",     "每场战斗第一次损失生命值时,抽 3 张牌",                  110 },
     { ItemType::BURNING_BLOOD,      true,  "燃烧之血",     "战斗胜利结束时,回复 6 点生命",                           160 },
     { ItemType::BATTLE_CONTINUATION,true,  "战斗续行",     "你没有用完的能量可以保留到下一回合",                       150 },
-    { ItemType::ORN_HORN,           true,  "奥恩之角",     "每当有敌人死亡时,获得并抽 1 张牌",                        130 },
+    { ItemType::ORN_HORN,           true,  "奥恩之角",     "每当有敌人死亡时,获得 1 点能量并抽 1 张牌",               130 },
     { ItemType::SUNDIAL,            true,  "日晷",         "每 3 次洗牌,获得 2 点能量",                               140 },
     { ItemType::WEAVER,             true,  "重织",         "每次将抽牌堆洗牌时,获得 6 点格挡",                        120 },
     { ItemType::HOLY_VIAL,          true,  "露滴圣杯瓶",   "每回合开始时获得 1 点能量(效果可叠加)",                   250 },

@@ -98,10 +98,11 @@ public:
     bool CarryEnergy() override;
 };
 
-// 奥恩之角:遗物,敌人死亡时获得并抽 1 张牌
+// 奥恩之角:遗物,敌人死亡时获得 1 点能量并抽 1 张牌
 class OrnHorn : public Item {
 public:
     int drawN = 1;
+    int gainEnergy = 1;
     OrnHorn();
     void OnEnemyDeath(Player& p, Combat* c) override;
 };
