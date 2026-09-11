@@ -82,8 +82,10 @@ bool Combat::Run() {
 }
 
 void Combat::PlayerTurn() {
-    energy = 3;
-    for (auto& r : p.relics) energy += r->EnergyAtTurnStart(p);  // 露滴圣杯瓶:每份 +1(可叠)
+    maxEnergy = 3;
+    for (auto& r : p.relics) maxEnergy += r->MaxEnergyBonus();   // 露滴圣杯瓶:最大能量 +1(可叠)
+    energy = maxEnergy;
+    for (auto& r : p.relics) energy += r->EnergyAtTurnStart(p);
     energy += carryEnergy; carryEnergy = 0;   // 战斗续行:把上回合留的能量加上
     p.block = 0;              // 格挡在你的回合开始时清空
     for (auto& r : p.relics) r->OnTurnStart(p);   // 回合开始遗物(律动残余归零等)
@@ -421,7 +423,7 @@ void Combat::ShowState() {
         + "   格挡 " + std::to_string(p.block)
         + "   坚韧 " + std::to_string(p.toughness)
         + "   力量 " + std::to_string(p.strength)
-        + "   能量 " + std::to_string(energy) + "/3");
+        + "   能量 " + std::to_string(energy) + "/" + std::to_string(maxEnergy));
     UI::Print("   神骸共鸣: " + (p.apotheosis ? std::string("形态中 (攻击 ×1.5)") : (std::to_string(p.apothGauge) +
         "%")));
     UI::Print("   抽牌堆 " + std::to_string(p.deck.draw.size())

@@ -36,8 +36,13 @@ static std::string SectionTitle(ShopKind k) {
 
 void Shop::Init() {
     stock.clear();
+    // 可上架的卡:跳过起始牌组自带的(打击/防御/…),不让商店重复兜售开局牌
+    std::vector<int> pool;
+    for (size_t i = 0; i < g_cards.size(); ++i)
+        if (!IsStarterCard((int)i)) pool.push_back((int)i);
+
     for (int k = 0; k < 4; ++k) {               // 4 张不重复的随机卡
-        int idx = std::rand() % (int)g_cards.size();
+        int idx = pool[std::rand() % pool.size()];
         bool dup = false;
         for (const auto& it : stock)
             if (it.cardIdx == idx) { dup = true; break; }
@@ -89,8 +94,10 @@ void Shop::AddRandomItems(bool isRelic, int count) {
 }
 
 void Shop::Enter(Player& p) {
+    bool firstRender = true;   // 首次进入不清屏,保留 main 刚打印的房间描述
     while (true) {
-        UI::Clear();
+        if (!firstRender) UI::Clear();
+        firstRender = false;
         UI::Print("========== 商 店 ==========");
         UI::Print("金币: " + std::to_string(p.coin));
         UI::Print("");

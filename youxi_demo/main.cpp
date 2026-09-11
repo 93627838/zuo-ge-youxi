@@ -81,7 +81,7 @@ static string normalizeCommand(const string& s) {
 
 // ===== 战后奖励 =====
 
-// 结算地图模块自带的房间奖励(金币/经验/物品/风味文本)
+// 结算地图模块自带的房间奖励(金币/物品/风味文本)
 // 以前这段被 clearCurrentRoom() 的返回值丢掉了,现在统一在这里结算
 static void grantReward(Player& p, const RoomReward& reward) {
     cout << "\n[战利品]\n";
@@ -89,7 +89,6 @@ static void grantReward(Player& p, const RoomReward& reward) {
         p.coin += reward.gold;
         cout << "  +" << reward.gold << " 金币 (当前 " << p.coin << ")\n";
     }
-    if (reward.exp > 0) cout << "  +" << reward.exp << " 经验\n";
     if (!reward.item_name.empty())
         cout << "  获得: " << reward.item_name << " (" << reward.item_effect << ")\n";
     if (!reward.flavor_text.empty())
@@ -134,10 +133,15 @@ static void RewardHolyVial(Player& p) {
 }
 
 // 卡牌:必出,从全部卡里随机抽 3 张不重复,选 1 张带走(0 跳过)
+// 起始牌组自带的牌(打击/防御/…)不上奖励池,免得奖励里全是开局就有的牌
 static void RewardCards(Player& p) {
+    vector<int> pool;
+    for (size_t i = 0; i < g_cards.size(); ++i)
+        if (!IsStarterCard((int)i)) pool.push_back((int)i);
+
     int picks[3];
     for (int k = 0; k < 3; ++k) {                   // 抽 3 张不重复的
-        const int idx = rand() % (int)g_cards.size();
+        const int idx = pool[rand() % pool.size()];
         bool dup = false;
         for (int i = 0; i < k; ++i)
             if (picks[i] == idx) { dup = true; break; }
@@ -187,6 +191,17 @@ static bool RunCombatRoom(Player& player, FloorManager& manager,
     }
 
     cout << "\n战斗胜利！\n";
+
+    // 首领战后恢复:把血量补到最大生命的九成(本来就更高就不动)
+    if (room.isBoss()) {
+        const int target = player.maxHp * 90 / 100;
+        if (player.hp < target) {
+            const int heal = target - player.hp;
+            player.hp = target;
+            cout << "击败首领,你重整旗鼓,回复 " << heal << " 点生命 (HP "
+                << player.hp << "/" << player.maxHp << ")。\n";
+        }
+    }
 
     RewardPotion(player);    // 药水(70% 概率)
     if (room.isBoss()) RewardHolyVial(player);   // BOSS 必掉露滴圣杯瓶
@@ -248,15 +263,26 @@ int main() {
     cin.get();
     cout << "\033[2J\033[2;1H";
 
+    // 房间信息块。只在"进入房间"时印一次,紧接着才是这个房间的内容
+    // (商店/宝箱/遭遇),所以 moveTo / tryGoUp 之后要立刻调用。
+    auto printRoomHeader = [&](const Room& r) {
+        cout << "\n========== [第 " << manager.getCurrentFloor() << " 层] "
+            << r.getColoredName() << " ==========\n";
+        cout << "\n" << r.getDesc() << "\n";
+        cout << "[类型: " << r.getTypeNameWithColor() << "]\n";
+        cout << "[HP " << player.hp << "/" << player.maxHp
+            << "  金币 " << player.coin << "]\n";
+    };
+
+    bool firstRoom = true;   // 起始房间也要印一次(它不是通过 moveTo 进的)
     bool quit = false;
     while (!quit) {
         const Room& cur = manager.getCurrentRoom();
-        cout << "\n========== [第 " << manager.getCurrentFloor() << " 层] "
-            << cur.getColoredName() << " ==========\n";
-        cout << "\n" << cur.getDesc() << "\n";
-        cout << "[类型: " << cur.getTypeNameWithColor() << "]\n";
-        cout << "[HP " << player.hp << "/" << player.maxHp
-            << "  金币 " << player.coin << "]\n";
+        const bool headerJustPrinted = firstRoom;
+        if (firstRoom) {
+            printRoomHeader(cur);
+            firstRoom = false;
+        }
 
         if (cur.isBoss() && manager.isBossDefeated()) {
             if (manager.isStoryEnd()) {
@@ -274,6 +300,12 @@ int main() {
         }
 
         if (!options.empty()) {
+            // 房间信息块只在进入时印过一次,这里补一行当前状态,
+            // 否则打完一场仗看不到自己还剩多少血。
+            // 起始房间那轮刚印过信息块,就别再重复印一遍了。
+            if (!headerJustPrinted)
+                cout << "\n[HP " << player.hp << "/" << player.maxHp
+                << "  金币 " << player.coin << "]\n";
             cout << "\n可选路径:\n";
             for (size_t i = 0; i < options.size(); ++i) {
                 const Room& next = manager.getRoomById(options[i]);
@@ -299,6 +331,7 @@ int main() {
                 if (manager.tryGoUp()) {
                     cout << "\033[2J\033[H";
                     cout << "你踏入了下一层...\n";
+                    printRoomHeader(manager.getCurrentRoom());
                     continue;
                 }
                 cout << "\033[2J\033[H";
@@ -314,6 +347,9 @@ int main() {
                 const int choice = stoi(cmd);
                 if (choice >= 1 && choice <= static_cast<int>(options.size())) {
                     manager.moveTo(options[choice - 1]);
+
+                    // 先印新房间的信息,再印这个房间的内容(商店/宝箱/遭遇)
+                    printRoomHeader(manager.getCurrentRoom());
 
                     // ★ 关键：进入房间后，按房间类型分流
                     const Room& entered = manager.getCurrentRoom();

@@ -8,13 +8,13 @@ void Player::NewRun() {
     strength = 0;
     nextAtkMult = 0;
     chr = 0.114514;
-    coin = 0;
+    coin = 99;
     // 起始牌组:下标对应 Data.cpp 里的 g_cards 表
     startDeck = {0, 0, 0, 0, 0, 1, 1, 1, 1, 3, 10, 11};
 
     // ===== 测试用:先自带一遗物两药水方便看效果;之后改为从奖励/商店获得 =====
     relics.clear();
-    relics.push_back(std::make_unique<BloodVial>());   // 开局自带小血瓶:每场战斗开始回 2 血
+    relics.push_back(std::make_unique<BloodVial>());   // 开局自带小血瓶:每场战斗开始回 8 血
     potions.clear();
     potions.push_back(std::make_unique<ForesightPotion>());
     potions.push_back(std::make_unique<DrawPotion>());

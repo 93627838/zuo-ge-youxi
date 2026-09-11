@@ -17,6 +17,19 @@ const std::vector<Card> g_cards = {//费用,类型,主效果,主效果数值,副
      {"人理之础", "获得 2 点坚韧", 1, CardType::POWER, CardEffect::GAIN_TOUGHNESS, 2},//no.12
 };
 
+// 起始牌组(Player::NewRun 里的 startDeck)固定用这几个下标:
+// 5 张打击 + 4 张防御 + 铁斩波 + 痛击 + 上勾拳
+bool IsStarterCard(int card_idx) {
+    switch (card_idx) {
+    case 0:  return true;    // 打击
+    case 1:  return true;    // 防御
+    case 3:  return true;    // 铁斩波
+    case 10: return true;    // 痛击
+    case 11: return true;    // 上勾拳
+    default: return false;
+    }
+}
+
 const std::vector<Enemy> g_enemies = {
     // ===== 第一层:灰烬平原 =====
     {"枯皮游荡者", 50, 50, 0, 0, 0, 0, {

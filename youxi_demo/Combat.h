@@ -34,6 +34,7 @@ private:
     std::vector<Enemy> es;          // 当前战斗的敌人列表(支持 1 对多群怪)
     int cur = 0;                    // 当前这张牌打向 es 里的哪只(-1=无目标)
     int energy = 0;                 // 本回合能量
+    int maxEnergy = 3;              // 本回合能量上限(基础 3 + 遗物加成,如露滴圣杯瓶)
     int carryEnergy = 0;            // 战斗续行:上回合留下来的能量
     bool firstTurn = true;          // 是否战斗第 1 回合(用来触发开局遗物)
     bool cardTriple = false;        // 本张攻击牌是否被超巨化 ×3

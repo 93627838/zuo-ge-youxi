@@ -143,11 +143,10 @@ void Weaver::OnShuffle(Player& p, Combat* c) {
 
 HolyVial::HolyVial() {
     name = "露滴圣杯瓶";
-    desc = "每回合开始时获得 " + std::to_string(bonus) + " 点能量(效果可叠加)";
+    desc = "最大能量 +" + std::to_string(bonus) + "(效果可叠加)";
 }
 
-int HolyVial::EnergyAtTurnStart(Player& p) {
-    UI::Print("遗物【" + name + "】生效:本回合能量 +" + std::to_string(bonus));
+int HolyVial::MaxEnergyBonus() {
     return bonus;
 }
 
@@ -292,14 +291,14 @@ const std::vector<ItemDef> g_itemCatalog = {
     { ItemType::SNAKE_RING,         true,  "蛇之戒指",     "每场战斗开始时,额外抽取 2 张牌",                      150 },
     { ItemType::AEGIS_SHIELD,       true,  "埃癸斯神盾",   "每场战斗开始时,获得 10 点格挡",                         120 },
     { ItemType::RHYTHM_REMNANT,     true,  "律动残余",     "你在一回合内失去的生命值不会超过 20 点",                 180 },
-    { ItemType::BLOOD_VIAL,         true,  "小血瓶",       "每场战斗开始时,回复 2 点生命",                            60 },
+    { ItemType::BLOOD_VIAL,         true,  "小血瓶",       "每场战斗开始时,回复 8 点生命",                            60 },
     { ItemType::CENTENNIAL_PUZZLE,  true,  "百年积木",     "每场战斗第一次损失生命值时,抽 3 张牌",                  110 },
     { ItemType::BURNING_BLOOD,      true,  "燃烧之血",     "战斗胜利结束时,回复 6 点生命",                           160 },
     { ItemType::BATTLE_CONTINUATION,true,  "战斗续行",     "你没有用完的能量可以保留到下一回合",                       150 },
     { ItemType::ORN_HORN,           true,  "奥恩之角",     "每当有敌人死亡时,获得 1 点能量并抽 1 张牌",               130 },
     { ItemType::SUNDIAL,            true,  "日晷",         "每 3 次洗牌,获得 2 点能量",                               140 },
     { ItemType::WEAVER,             true,  "重织",         "每次将抽牌堆洗牌时,获得 6 点格挡",                        120 },
-    { ItemType::HOLY_VIAL,          true,  "露滴圣杯瓶",   "每回合开始时获得 1 点能量(效果可叠加)",                   250 },
+    { ItemType::HOLY_VIAL,          true,  "露滴圣杯瓶",   "最大能量 +1(效果可叠加)",                   250 },
 
     { ItemType::BOTTLED_FAIRY,      false, "瓶装精灵",     "生命值将被减少至 0 或以下时,丢弃本药水,回复至最大生命值的 30%", 90 },
     { ItemType::DRAW_POTION,        false, "抽牌药水",     "使用后,本回合抽取 3 张牌",                               45 },

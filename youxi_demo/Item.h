@@ -32,7 +32,8 @@ public:
     // ---- 下面 5 个是后加遗物用到的被动事件(用不到就不 override) ----
     virtual void OnCombatEnd(Player& p) {}                       // 战斗胜利结束时(燃烧之血回血)
     virtual void OnEnemyDeath(Player& p, Combat* c) {}           // 有敌人死亡时(奥恩之角;多敌人战斗才有实义)
-    virtual int  EnergyAtTurnStart(Player& p) { return 0; }      // 每个玩家回合开始的能量加成(露滴圣杯瓶每份 +1)
+    virtual int  EnergyAtTurnStart(Player& p) { return 0; }      // 每个玩家回合开始的能量加成(战斗续行类)
+    virtual int  MaxEnergyBonus() { return 0; }                  // 最大能量加成(露滴圣杯瓶每份 +1,可叠加)
     virtual bool CarryEnergy() { return false; }                 // true = 回合结束多余能量留到下回合(战斗续行)
     virtual void OnShuffle(Player& p, Combat* c) {}              // 抽牌堆每洗一次(日晷计数 / 重织加格挡)
 };
@@ -68,7 +69,7 @@ public:
 // 小血瓶:遗物,战斗开始回血
 class BloodVial : public Item {
 public:
-    int healN = 2;
+    int healN = 8;
     BloodVial();
     void OnBattleStart(Player& p) override;
 };
@@ -126,12 +127,12 @@ public:
     void OnShuffle(Player& p, Combat* c) override;
 };
 
-// 露滴圣杯瓶:遗物,每回合开始时获得 1 点能量(效果可叠加)
+// 露滴圣杯瓶:遗物,最大能量 +1(效果可叠加)
 class HolyVial : public Item {
 public:
     int bonus = 1;
     HolyVial();
-    int EnergyAtTurnStart(Player& p) override;
+    int MaxEnergyBonus() override;
 };
 
 //药水
