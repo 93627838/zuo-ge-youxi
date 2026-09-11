@@ -3,11 +3,7 @@
 #include <string>
 #include "Room.h"
 #include "MapTemplates.h"
-
-struct FloorData {
-    std::unordered_map<std::string, Room> rooms;
-    MapTemplate tmpl;
-};
+#include "FloorData.h"
 
 class FloorBuilder {
 public:
@@ -18,6 +14,5 @@ public:
     static std::unordered_map<std::string, Room> buildFloor5();
     static std::unordered_map<std::string, Room> buildFloor6();
     static std::unordered_map<std::string, Room> buildFloor7();
-
-    static void buildFloorData(int floor, FloorData& data);
+    // NOTE: buildFloorData(int, FloorData&) was legacy dead code and has been removed.
 };

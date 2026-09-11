@@ -147,6 +147,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="FloorBuilder.h" />
+    <ClInclude Include="FloorData.h" />
     <ClInclude Include="FloorGenerator.h" />
     <ClInclude Include="FloorManager.h" />
     <ClInclude Include="FloorSource.h" />

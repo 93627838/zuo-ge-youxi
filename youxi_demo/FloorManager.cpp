@@ -52,7 +52,7 @@ void FloorManager::loadFloor(int floor, unsigned int seed) {
     boss_defeated = false;
     map_seed = seed;
 
-    LoadedFloor loaded = FloorSource::load(floor, game_mode, seed);
+    FloorData loaded = FloorSource::load(floor, game_mode, seed);
     rooms = std::move(loaded.rooms);
     current_tmpl = std::move(loaded.tmpl);
     current_is_fixed = loaded.fixed_layout;
@@ -133,7 +133,7 @@ void FloorManager::drawMap() const {
         return;
     }
 
-    if (current_is_fixed || current_tmpl.coords.empty()) {
+    if (current_tmpl.coords.empty()) {
         cout << "\n===== 当前楼层地图 (第 " << current_floor << " 层 · 固定剧情) =====\n";
         const Room& cur = getCurrentRoom();
         cout << "当前位于: " << cur.getName() << " [" << cur.getTypeNameWithColor() << "]\n";
@@ -204,20 +204,12 @@ void FloorManager::drawMap() const {
         }
     }
 
-    // 4. 绘制节点（覆盖线条）
-    for (const auto& pair : rooms) {
-        const Room& room = pair.second;
-        int node = -1;
-        string id = room.getId();
-        size_t pos = id.find('_');
-        if (pos != string::npos) {
-            string numStr = id.substr(pos + 2);
-            try {
-                node = stoi(numStr);
-            }
-            catch (...) { continue; }
-        }
-        if (node < 0 || node >= (int)current_tmpl.coords.size()) continue;
+    // 4. 绘制节点（覆盖线条）——统一按 current_tmpl.node_ids 的索引映射，不再解析房间ID字符串
+    for (int node = 0; node < (int)current_tmpl.node_ids.size(); ++node) {
+        const string& id = current_tmpl.node_ids[node];
+        auto it = rooms.find(id);
+        if (it == rooms.end()) continue;
+        const Room& room = it->second;
 
         int x = current_tmpl.coords[node].first;
         int y = current_tmpl.coords[node].second;
@@ -225,7 +217,7 @@ void FloorManager::drawMap() const {
 
         char symbol;
         string color;
-        if (room.getId() == current_room_id) {
+        if (id == current_room_id) {
             symbol = '@';
             color = Color::BOLD + Color::BRIGHT;
         }
@@ -246,7 +238,7 @@ void FloorManager::drawMap() const {
     }
 
     // 5. 输出画布
-    cout << "\n===== 当前楼层地图 (楼层 " << current_floor << ") =====\n";
+    cout << "\n===== 当前楼层地图 (楼层 " << current_floor << (current_is_fixed ? " · 固定剧情" : "") << ") =====\n";
     for (int y = 0; y < HEIGHT; ++y) {
         cout << "\n";
         for (int x = 0; x < WIDTH; ++x) {

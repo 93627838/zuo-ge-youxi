@@ -2,6 +2,7 @@
 #pragma once
 #include <vector>
 #include <utility>
+#include <string>
 
 struct MapTemplate {
     int total_rooms;
@@ -9,6 +10,7 @@ struct MapTemplate {
     int start_node;
     int boss_node;
     std::vector<std::pair<int, int>> coords;     // 每个节点的 (列, 行) 坐标
+    std::vector<std::string> node_ids;           // 与 coords/edges 对应的节点房间ID（绘制地图时统一用此映射）
 };
 
 namespace MapTemplates {

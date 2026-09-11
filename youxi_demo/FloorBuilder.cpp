@@ -1282,31 +1282,5 @@ using namespace std;
         return rooms;
     }
 
-// 楼层数据分发函数
-    void FloorBuilder::buildFloorData(int floor, FloorData& data) {
-        switch (floor) {
-        case 1:
-            data.rooms = buildFloor1();
-            break;
-        case 2:
-            data.rooms = buildFloor2();
-            break;
-        case 3:
-            data.rooms = buildFloor3();
-            break;
-        case 4:
-            data.rooms = buildFloor4();
-            break;
-        case 5:
-            data.rooms = buildFloor5();
-            break;
-        case 6:
-            data.rooms = buildFloor6();
-            break;
-        case 7:
-            data.rooms = buildFloor7();
-            break;
-        default:
-            throw std::runtime_error("未实现的楼层编号");
-        }
-    }
+// 注：buildFloorData(int, FloorData&) 历史遗留死代码已于本次优化移除，
+//     楼层数据统一由 FloorSource::load() 通过 buildFloor1..7 构建。

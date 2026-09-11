@@ -27,6 +27,9 @@
     <ClCompile Include="FloorGenerator.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
+    <ClCompile Include="FloorSource.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="FloorManager.h">
@@ -36,6 +39,12 @@
       <Filter>头文件</Filter>
     </ClInclude>
     <ClInclude Include="FloorBuilder.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="FloorData.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="FloorSource.h">
       <Filter>头文件</Filter>
     </ClInclude>
     <ClInclude Include="MapTemplates.h">

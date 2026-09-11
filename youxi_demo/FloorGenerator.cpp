@@ -255,7 +255,7 @@ RoomReward FloorGenerator::generateReward(RoomType type, int floor, mt19937& rng
 }
 
 // ---------- 核心生成函数 ----------
-GenerationResult FloorGenerator::generateFloor(int floor, unsigned int seed, int text_floor) {
+FloorData FloorGenerator::generateFloor(int floor, unsigned int seed, int text_floor) {
     // 1. 初始化随机数生成器
     mt19937 rng(seed ? seed : random_device{}());
 
@@ -420,6 +420,14 @@ GenerationResult FloorGenerator::generateFloor(int floor, unsigned int seed, int
         }
     }
 
-    // 6. 返回 GenerationResult（包含房间地图和模板）
-    return { rooms, tmpl };
+    // 6. 填充节点ID映射，供地图绘制统一使用（不再依赖解析房间ID里的 "N{node}"）
+    tmpl.node_ids.resize(tmpl.total_rooms);
+    for (int i = 0; i < tmpl.total_rooms; ++i)
+        tmpl.node_ids[i] = genId(actual_floor, i);
+
+    // 7. 返回统一的 FloorData（包含房间地图和模板）
+    FloorData result;
+    result.rooms = std::move(rooms);
+    result.tmpl = std::move(tmpl);
+    return result;
 }
