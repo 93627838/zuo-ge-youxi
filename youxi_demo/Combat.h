@@ -23,6 +23,7 @@ private:
     void BattleStartRelics();    // 战斗开始(仅第 1 回合)触发遗物
     void UsePotionMenu();        // 打开药水背包(主动使用)
     void ShowRelicInfo();//查看遗物信息
+    void ShowDeckView(); //查看牌组构成 + 本回合每张手牌的伤害预览
     void HurtPlayer(int rawDmg, const std::string& attackerName); // 结算对玩家的伤害(格挡→濒死药水→扣血)
 
     int AliveCount() const;                    // 存活敌人数量

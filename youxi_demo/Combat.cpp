@@ -1,5 +1,6 @@
 ﻿#include "Combat.h"
 #include "Data.h"
+#include "DeckView.h"
 #include "UI.h"
 #include <algorithm>
 #include <string>
@@ -95,7 +96,7 @@ void Combat::PlayerTurn() {
             BattleStartRelics();
             continue;         // 遗物抽完牌后重新展示一次界面
         }
-        UI::Print("输入手牌编号出牌 / 0 结束回合 / P 使用药水/ R 查看遗物:");
+        UI::Print("输入手牌编号出牌 / 0 结束回合 / P 使用药水 / R 查看遗物 / D 查看牌组:");
         std::string line = UI::GetLine();
         if (line == "0") break;
         if (line == "P" || line == "p") {   // 打开药水背包
@@ -105,6 +106,10 @@ void Combat::PlayerTurn() {
         }
         if (line == "R" || line == "r") {   // 查看遗物说明
             ShowRelicInfo();
+            continue;
+        }
+        if (line == "D" || line == "d") {   // 查看牌组构成 + 伤害预览
+            ShowDeckView();
             continue;
         }
         int sel = std::atoi(line.c_str());
@@ -172,6 +177,17 @@ void Combat::ShowRelicInfo() {
         UI::Print(std::to_string(i + 1) + ". 【" + it.name + "】");
         UI::Print("   " + it.desc);
     }
+    UI::Pause();
+}
+
+void Combat::ShowDeckView() {
+    // 战斗内的"整副牌" = 手牌 + 抽牌堆 + 弃牌堆
+    std::vector<int> all = p.deck.hand;
+    all.insert(all.end(), p.deck.draw.begin(), p.deck.draw.end());
+    all.insert(all.end(), p.deck.discard.begin(), p.deck.discard.end());
+
+    UI::Clear();
+    DeckView::PrintGroupedCounts(all, "你的牌组");
     UI::Pause();
 }
 
@@ -397,14 +413,6 @@ void Combat::HurtPlayer(int rawDmg, const std::string& attackerName) {
     for (auto& r : p.relics) r->AfterHPLoss(p, loss);   // 受伤后遗物(百年积木)
 }
 
-inline const char* CardTypeName(CardType t) {
-    switch (t) {
-    case CardType::ATTACK: return "攻击";
-    case CardType::SKILL:  return "技能";
-    case CardType::POWER:  return "能力";
-    }
-    return "?";
-}
 void Combat::ShowState() {
 
     UI::Clear();
@@ -491,11 +499,14 @@ void Combat::ShowState() {
     if (p.deck.hand.empty()) {
         UI::Print("(手牌为空,输入 0 结束回合)");
     }
-    for (size_t i = 0; i < p.deck.hand.size(); ++i) {
-        const Card& c = g_cards[p.deck.hand[i]];
-        UI::Print(std::to_string(i + 1) + ". 【" + c.name + "】("
-            + (c.isX ? "X" : std::to_string(c.cost))
-            + "费, " + CardTypeName(c.type) + ") " + c.desc);
-    }
+    // 每张手牌直接显示实算后的伤害/格挡,而不是卡面的固定描述
+    // 用当前选定目标;还没选过/目标已死就退回第一只存活敌人
+    int vuln = 0;
+    const int tgt = (cur >= 0 && cur < static_cast<int>(es.size()) && es[cur].hp > 0)
+        ? cur : AliveIndex(0);
+    if (tgt >= 0) vuln = es[tgt].vulnerable;
+    for (size_t i = 0; i < p.deck.hand.size(); ++i)
+        UI::Print(std::to_string(i + 1) + ". "
+            + DeckView::FormatCardPreview(g_cards[p.deck.hand[i]], p, vuln));
     UI::Print("");
 }

@@ -1,8 +1,20 @@
 ﻿#include "shop.h"
 #include "Data.h"   // g_cards
+#include "DeckView.h"
 #include "UI.h"
 #include <utility>           // std::pair
-#include <cstdlib>           // std::rand
+#include <cstdlib>           // std::rand / std::atoi
+#include <cctype>            // std::tolower
+
+// 去首尾空白并转小写,让 'D' / 'd' / ' D ' 等价(CJK 原样保留)
+static std::string NormalizeInput(const std::string& s) {
+    const size_t a = s.find_first_not_of(" \t\r\n");
+    if (a == std::string::npos) return "";
+    const size_t b = s.find_last_not_of(" \t\r\n");
+    std::string r = s.substr(a, b - a + 1);
+    for (char& c : r) c = static_cast<char>(std::tolower(static_cast<unsigned char>(c)));
+    return r;
+}
 
 static int CardPrice(const Card& c) {
     switch (c.rarity) {
@@ -95,10 +107,16 @@ void Shop::Enter(Player& p) {
                 + it.desc + " — " + std::to_string(it.price) + " 金币");
         }
         UI::Print("0. 离开商店");
-        UI::Print("请选择:");
+        UI::Print("输入编号购买 / 0 离开 / D 查看牌组:");
 
-        int sel = UI::GetInt();
-        if (sel == 0) break;
+        // 用 GetLine 而不是 GetInt:这样 'D' 之类的字母才不会被 atoi 成 0 直接踢出商店
+        const std::string cmd = NormalizeInput(UI::GetLine());
+        if (cmd == "d" || cmd == "牌组") {
+            DeckView::ShowDeckOnly(p);
+            continue;
+        }
+        if (cmd == "0") break;
+        const int sel = std::atoi(cmd.c_str());
         if (sel < 1 || sel >(int)stock.size()) { UI::Print("无效选择。"); UI::Pause(); continue; }
 
         ShopItem& it = stock[sel - 1];
