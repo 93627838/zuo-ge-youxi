@@ -143,17 +143,35 @@
     <ClCompile Include="FloorGenerator.cpp" />
     <ClCompile Include="FloorManager.cpp" />
     <ClCompile Include="FloorSource.cpp" />
+    <ClCompile Include="Combat.cpp" />
+    <ClCompile Include="Data.cpp" />
+    <ClCompile Include="Deck.cpp" />
+    <ClCompile Include="Item.cpp" />
+    <ClCompile Include="Player.cpp" />
+    <ClCompile Include="shop.cpp" />
+    <ClCompile Include="EncounterBuilder.cpp" />
+    <ClCompile Include="UI.cpp" />
     <ClCompile Include="main.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="FloorBuilder.h" />
-    <ClInclude Include="FloorData.h" />
     <ClInclude Include="FloorGenerator.h" />
     <ClInclude Include="FloorManager.h" />
     <ClInclude Include="FloorSource.h" />
+    <ClInclude Include="FloorData.h" />
     <ClInclude Include="GameMode.h" />
     <ClInclude Include="MapTemplates.h" />
     <ClInclude Include="Room.h" />
+    <ClInclude Include="Card.h" />
+    <ClInclude Include="Combat.h" />
+    <ClInclude Include="Data.h" />
+    <ClInclude Include="Deck.h" />
+    <ClInclude Include="Enemy.h" />
+    <ClInclude Include="Item.h" />
+    <ClInclude Include="Player.h" />
+    <ClInclude Include="shop.h" />
+    <ClInclude Include="UI.h" />
+    <ClInclude Include="EncounterBuilder.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

@@ -31,6 +31,7 @@ private:
     RoomType type;
     RoomReward reward;
     bool is_cleared = false;          // 是否已完成（防止重复战斗/领奖）
+    bool visited = false;             // 玩家是否已经进入过这个房间
     std::vector<std::string> next_ids; // 后续节点ID列表（顺序即选项顺序）
 
 public:
@@ -50,6 +51,7 @@ public:
     const RoomReward& getReward() const { return reward; }
     const std::vector<std::string>& getNextIds() const { return next_ids; }
     bool isCompleted() const { return is_cleared; }
+    bool isVisited() const { return visited; }
 
     // ---------- 便捷类型判断 ----------
     bool isCombat() const { return type == RoomType::Combat || type == RoomType::Elite; }
@@ -60,6 +62,7 @@ public:
     void setReward(const RoomReward& r) { reward = r; }
     void addNext(const std::string& next_id) { next_ids.push_back(next_id); }
     void markCleared() { is_cleared = true; }
+    void markVisited() { visited = true; }
 
     // ---------- 工具函数：获取类型的中文描述 ----------
     std::string getTypeNameWithColor() const {

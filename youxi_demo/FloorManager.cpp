@@ -26,6 +26,7 @@ namespace Color {
     const std::string GRAY = "\033[90m";
     const std::string BOLD = "\033[1m";
     const std::string BRIGHT = "\033[92m";
+    const std::string BRIGHT_WHITE = "\033[97m";
 
     void init() {
 #ifdef _WIN32
@@ -72,6 +73,7 @@ void FloorManager::loadFloor(int floor, unsigned int seed) {
             throw runtime_error("楼层数据为空！");
         }
     }
+    rooms[current_room_id].markVisited();
 }
 
 const Room& FloorManager::getCurrentRoom() const {
@@ -100,6 +102,7 @@ bool FloorManager::moveTo(const string& target_id) {
     if (find(nexts.begin(), nexts.end(), target_id) == nexts.end())
         return false;
     current_room_id = target_id;
+    rooms[current_room_id].markVisited();
     return true;
 }
 
@@ -136,7 +139,7 @@ void FloorManager::drawMap() const {
     if (current_tmpl.coords.empty()) {
         cout << "\n===== 当前楼层地图 (第 " << current_floor << " 层 · 固定剧情) =====\n";
         const Room& cur = getCurrentRoom();
-        cout << "当前位于: " << cur.getName() << " [" << cur.getTypeNameWithColor() << "]\n";
+        cout << "当前位于: " << cur.getName() << "\n";
         const auto& options = cur.getNextIds();
         if (options.empty()) {
             cout << "前方没有更多房间，击败BOSS后可继续前进。\n";
@@ -145,7 +148,7 @@ void FloorManager::drawMap() const {
             cout << "可前往:\n";
             for (const auto& id : options) {
                 const Room& next = getRoomById(id);
-                cout << "  - " << next.getName() << " [" << next.getTypeNameWithColor() << "]\n";
+                cout << "  - " << next.getName() << "\n";
             }
         }
         cout << "\n";
@@ -219,17 +222,21 @@ void FloorManager::drawMap() const {
         string color;
         if (id == current_room_id) {
             symbol = '@';
-            color = Color::BOLD + Color::BRIGHT;
+            color = Color::BOLD + Color::BRIGHT_WHITE;
+        }
+        else if (!room.isVisited()) {
+            symbol = '?';
+            color = Color::GRAY;
         }
         else {
             switch (room.getType()) {
             case RoomType::Start:    symbol = 'P'; color = Color::WHITE;   break;
-            case RoomType::Combat:   symbol = 'C'; color = Color::GRAY;    break;
+            case RoomType::Combat:   symbol = 'C'; color = Color::BLUE;    break;
             case RoomType::Elite:    symbol = 'E'; color = Color::YELLOW;  break;
             case RoomType::Boss:     symbol = 'B'; color = Color::RED;     break;
             case RoomType::Treasure: symbol = 'T'; color = Color::CYAN;    break;
             case RoomType::Event:    symbol = 'V'; color = Color::MAGENTA; break;
-            case RoomType::Shop:     symbol = 'S'; color = Color::GREEN;   break;
+            case RoomType::Shop:     symbol = 'S'; color = Color::BRIGHT;  break;
             default:                 symbol = '?'; color = Color::WHITE;   break;
             }
         }
@@ -250,16 +257,16 @@ void FloorManager::drawMap() const {
         }
     }
 
-    // 6. 图例
+    // 6. 图例：固定完整显示
     cout << "\n图例: ";
     cout << Color::WHITE << "P起点 " << Color::RESET;
-    cout << Color::GRAY << "C战斗 " << Color::RESET;
+    cout << Color::BLUE << "C战斗 " << Color::RESET;
     cout << Color::YELLOW << "E精英 " << Color::RESET;
     cout << Color::RED << "B首领 " << Color::RESET;
     cout << Color::CYAN << "T宝藏 " << Color::RESET;
     cout << Color::MAGENTA << "V事件 " << Color::RESET;
-    cout << Color::GREEN << "S商店 " << Color::RESET;
-    cout << Color::BOLD << Color::BRIGHT << "@你 " << Color::RESET;
+    cout << Color::BRIGHT << "S商店 " << Color::RESET;
+    cout << Color::GRAY << "?未探索 " << Color::RESET;
+    cout << Color::BOLD << Color::BRIGHT_WHITE << "@你 " << Color::RESET;
     cout << "\n当前位于: " << getCurrentRoom().getName() << "\n\n";
 }
-
